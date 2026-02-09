@@ -1,0 +1,112 @@
+# https://taskfile.dev
+version: "3"
+
+vars:
+  BINARY: ccb
+  MODULE: github.com/anthropics/claude_code_bridge
+  VERSION:
+    sh: git describe --tags --always --dirty 2>/dev/null || echo "dev"
+  COMMIT:
+    sh: git rev-parse --short HEAD 2>/dev/null || echo "unknown"
+  LDFLAGS: -s -w -X main.version={{.VERSION}}
+  GOFLAGS: -trimpath
+
+tasks:
+  default:
+    desc: Run lint, test, and build
+    cmds:
+      - task: lint
+      - task: test
+      - task: build
+
+  # ── Build ──────────────────────────────────────────────────
+  build:
+    desc: Build the binary
+    cmds:
+      - go build {{.GOFLAGS}} -ldflags "{{.LDFLAGS}}" -o {{.BINARY}}{{exeExt}} ./cmd/ccb/
+    sources:
+      - "**/*.go"
+      - go.mod
+      - go.sum
+    generates:
+      - "{{.BINARY}}{{exeExt}}"
+
+  install:
+    desc: Install to $GOPATH/bin
+    cmds:
+      - go install {{.GOFLAGS}} -ldflags "{{.LDFLAGS}}" ./cmd/ccb/
+
+  # ── Quality ────────────────────────────────────────────────
+  test:
+    desc: Run tests with race detector
+    cmds:
+      - go test -v -race -count=1 -coverprofile=coverage.out ./...
+
+  test:short:
+    desc: Run tests (short mode)
+    cmds:
+      - go test -short -count=1 ./...
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run --timeout=5m ./...
+
+  fmt:
+    desc: Format code
+    cmds:
+      - go fmt ./...
+      - goimports -w .
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  # ── Coverage ───────────────────────────────────────────────
+  cover:
+    desc: Generate HTML coverage report
+    deps: [test]
+    cmds:
+      - go tool cover -html=coverage.out -o coverage.html
+      - echo "Coverage report:// coverage.html"
+
+  # ── Cross-compile ──────────────────────────────────────────
+  build:all:
+    desc: Build for all platforms
+    cmds:
+      - mkdir -p dist
+      - for:
+          matrix:
+            GOOS: [linux, darwin, windows]
+            GOARCH: [amd64, arm64]
+        cmd: >-
+          GOOS={{.ITEM.GOOS}} GOARCH={{.ITEM.GOARCH}}
+          go build {{.GOFLAGS}} -ldflags "{{.LDFLAGS}}"
+          -o dist/{{.BINARY}}-{{.ITEM.GOOS}}-{{.ITEM.GOARCH}}{{if eq .ITEM.GOOS "windows"}}.exe{{end}}
+          ./cmd/ccb/
+
+  # ── Release ────────────────────────────────────────────────
+  snapshot:
+    desc: GoReleaser snapshot (no publish)
+    cmds:
+      - goreleaser release --snapshot --clean
+
+  release:
+    desc: GoReleaser full release (requires GITHUB_TOKEN)
+    cmds:
+      - goreleaser release --clean
+
+  # ── Tidy ───────────────────────────────────────────────────
+  tidy:
+    desc: Tidy and verify dependencies
+    cmds:
+      - go mod tidy
+      - go mod verify
+
+  # ── Clean ──────────────────────────────────────────────────
+  clean:
+    desc: Remove build artifacts
+    cmds:
+      - rm -f {{.BINARY}} {{.BINARY}}.exe coverage.out coverage.html
+      - rm -rf dist/

@@ -305,7 +305,7 @@ func writeSessionFile(sessionFile string, provider string, paneID string, workDi
 				existing["work_dir"] = workDir
 			}
 			out, _ := json.MarshalIndent(existing, "", "  ")
-			os.WriteFile(sessionFile, out, 0644)
+			os.WriteFile(sessionFile, out, 0600)
 			return
 		}
 	}
@@ -321,7 +321,7 @@ func writeSessionFile(sessionFile string, provider string, paneID string, workDi
 		"ccb_project_id": config.ComputeCCBProjectID(workDir),
 	}
 	out, _ := json.MarshalIndent(sess, "", "  ")
-	os.WriteFile(sessionFile, out, 0644)
+	os.WriteFile(sessionFile, out, 0600)
 }
 
 // ccbRunDir returns the CCB runtime directory.
@@ -517,7 +517,7 @@ trust_level = "trusted"
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 `
-	return os.WriteFile(configFile, []byte(toml), 0644)
+	return os.WriteFile(configFile, []byte(toml), 0600)
 }
 
 // ensureOpenCodeAutoConfig writes auto-approve config for OpenCode.
@@ -547,7 +547,7 @@ func ensureOpenCodeAutoConfig() error {
 				perms["auto_approve"] = true
 			}
 			out, _ := json.MarshalIndent(cfg, "", "  ")
-			return os.WriteFile(configFile, out, 0644)
+			return os.WriteFile(configFile, out, 0600)
 		}
 	}
 
@@ -559,5 +559,5 @@ func ensureOpenCodeAutoConfig() error {
 		},
 	}
 	out, _ := json.MarshalIndent(cfg, "", "  ")
-	return os.WriteFile(configFile, out, 0644)
+	return os.WriteFile(configFile, out, 0600)
 }

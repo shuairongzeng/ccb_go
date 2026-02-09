@@ -386,7 +386,7 @@ func (s *Server) writeState(host string, port int) {
 	}
 	data, _ := json.MarshalIndent(state, "", "  ")
 	os.MkdirAll(runtime.RunDir(), 0755)
-	os.WriteFile(s.stateFile, data, 0644)
+	os.WriteFile(s.stateFile, data, 0600)
 }
 
 // removeState removes the daemon state file.

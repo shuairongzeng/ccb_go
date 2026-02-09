@@ -245,7 +245,7 @@ func EnsureDefaultStartConfig(workDir string) (string, bool) {
 		return "", false
 	}
 	payload := strings.Join(DefaultProviders, ",") + "\n"
-	if err := os.WriteFile(project, []byte(payload), 0644); err != nil {
+	if err := os.WriteFile(project, []byte(payload), 0600); err != nil {
 		return "", false
 	}
 	return project, true

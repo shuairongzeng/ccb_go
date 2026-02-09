@@ -97,7 +97,7 @@ func SafeWriteSession(sessionFile string, content string) (bool, string) {
 
 	// Atomic write via temp file + rename
 	tmpFile := sessionFile + ".tmp"
-	if err := os.WriteFile(tmpFile, []byte(content), 0644); err != nil {
+	if err := os.WriteFile(tmpFile, []byte(content), 0600); err != nil {
 		os.Remove(tmpFile)
 		return false, fmt.Sprintf("Cannot write %s: %s\nTry: rm -f %s then retry", filepath.Base(sessionFile), err, sessionFile)
 	}

@@ -60,7 +60,7 @@ func isPIDAlive(pid int) bool {
 func (l *ProviderLock) TryAcquire() bool {
 	os.MkdirAll(l.LockDir, 0755)
 
-	f, err := os.OpenFile(l.LockFile, os.O_CREATE|os.O_RDWR, 0644)
+	f, err := os.OpenFile(l.LockFile, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		return false
 	}
@@ -73,7 +73,7 @@ func (l *ProviderLock) TryAcquire() bool {
 	// Check for stale lock
 	if l.checkStaleLock() {
 		l.fd.Close()
-		f, err = os.OpenFile(l.LockFile, os.O_CREATE|os.O_RDWR, 0644)
+		f, err = os.OpenFile(l.LockFile, os.O_CREATE|os.O_RDWR, 0600)
 		if err != nil {
 			return false
 		}
@@ -92,7 +92,7 @@ func (l *ProviderLock) TryAcquire() bool {
 func (l *ProviderLock) Acquire() bool {
 	os.MkdirAll(l.LockDir, 0755)
 
-	f, err := os.OpenFile(l.LockFile, os.O_CREATE|os.O_RDWR, 0644)
+	f, err := os.OpenFile(l.LockFile, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
 		return false
 	}
@@ -110,7 +110,7 @@ func (l *ProviderLock) Acquire() bool {
 			staleChecked = true
 			if l.checkStaleLock() {
 				l.fd.Close()
-				f, err = os.OpenFile(l.LockFile, os.O_CREATE|os.O_RDWR, 0644)
+				f, err = os.OpenFile(l.LockFile, os.O_CREATE|os.O_RDWR, 0600)
 				if err != nil {
 					return false
 				}

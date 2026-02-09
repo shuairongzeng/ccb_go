@@ -388,7 +388,7 @@ func (r *PaneRegistry) saveLocked() {
 		return
 	}
 	tmpFile := r.filePath + ".tmp"
-	if err := os.WriteFile(tmpFile, data, 0644); err != nil {
+	if err := os.WriteFile(tmpFile, data, 0600); err != nil {
 		return
 	}
 	os.Rename(tmpFile, r.filePath)
